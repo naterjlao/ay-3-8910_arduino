@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "include/ay-3-8910.hpp"
 
-#define DEBUG
+//#define DEBUG
 
 void AY3::begin()
 {
@@ -45,8 +45,7 @@ void AY3::begin()
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_inactive()
 {
-    digitalWrite(A1, LOW);
-    digitalWrite(A2, LOW);
+    PORTC = B00000000 | (PORTC & B11111001);
 }
 
 //-----------------------------------------------------------------------------
@@ -61,8 +60,7 @@ void AY3::bus_mode_inactive()
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_read()
 {
-    digitalWrite(A1, LOW);
-    digitalWrite(A2, HIGH);
+    PORTC = B00000100 | (PORTC & B11111001);
 }
 
 //-----------------------------------------------------------------------------
@@ -77,8 +75,7 @@ void AY3::bus_mode_read()
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_write()
 {
-    digitalWrite(A1, HIGH);
-    digitalWrite(A2, LOW);
+    PORTC = B00000010 | (PORTC & B11111001);
 }
 
 //-----------------------------------------------------------------------------
@@ -93,8 +90,7 @@ void AY3::bus_mode_write()
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_latch_address()
 {
-    digitalWrite(A1, HIGH);
-    digitalWrite(A2, HIGH);
+    PORTC = B00000110 | (PORTC & B11111001);
 }
 
 static const uint16_t INVALID_REG = 0XFFFF;
@@ -150,38 +146,41 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
 #endif
         if (ch != AY3::CHANNEL_NOISE)
         {
-            // Write to tone course register
-            AY3::bus_mode_inactive();
+            // ----- TONE COURSE ----- //
+            // Register Address
             AY3::bus_mode_latch_address();
             PORTD = static_cast<uint8_t>(reg >> 8);
+            AY3::bus_mode_inactive();
 #ifdef DEBUG
             Serial.print(", course_addr=0x");
             Serial.print(PORTD, HEX);
 #endif
-            AY3::bus_mode_inactive();
+            // Data Value
             PORTD = static_cast<uint8_t>((data >> 8) & UPPER_MASK);
+            AY3::bus_mode_write();
+            AY3::bus_mode_inactive();
 #ifdef DEBUG
             Serial.print(", course_data=0x");
             Serial.print(PORTD, HEX);
 #endif
-            AY3::bus_mode_write();
 
-            // Write to tone fine register
-            AY3::bus_mode_inactive();
+            // ----- TONE FINE ----- //
+            // Register Address
             AY3::bus_mode_latch_address();
             PORTD = static_cast<uint8_t>(reg & LOWER_MASK);
+            AY3::bus_mode_inactive();
 #ifdef DEBUG
             Serial.print(", fine_addr=0x");
             Serial.print(PORTD, HEX);
 #endif
-            AY3::bus_mode_inactive();
+            // Data Value
             PORTD = static_cast<uint8_t>(data & LOWER_MASK);
+            AY3::bus_mode_write();
+            AY3::bus_mode_inactive();
 #ifdef DEBUG
             Serial.print(", fine_data=0x");
             Serial.print(PORTD, HEX);
 #endif
-            AY3::bus_mode_write();
-            AY3::bus_mode_inactive();
         }
         else
         {
