@@ -33,28 +33,68 @@ void AY3::begin()
     digitalWrite(A0, HIGH);
 }
 
+//-----------------------------------------------------------------------------
+/// @brief Sets the BDIR and BC1 pins to Inactive state.
+/// @note BC2 is latched HIGH in hardware.
+/// @details Register states are set as follows:
+/// Register      | State
+/// ------------- | -------
+/// BDIR (A1)     |  0
+/// BC1 (A2)      |  0
+/// BC2 (LATCHED) |  1
+//-----------------------------------------------------------------------------
 void AY3::bus_mode_inactive()
 {
-    digitalWrite(A1, LOW); // BDIR (A1) - 0
-    digitalWrite(A2, LOW); // BC1 (A2)  - 0
+    digitalWrite(A1, LOW);
+    digitalWrite(A2, LOW);
 }
 
+//-----------------------------------------------------------------------------
+/// @brief Sets the BDIR and BC1 pins to Data Read state.
+/// @note BC2 is latched HIGH in hardware.
+/// @details Register states are set as follows:
+/// Register      | State
+/// ------------- | -------
+/// BDIR (A1)     | 0
+/// BC1 (A2)      | 1
+/// BC2 (LATCHED) | 1
+//-----------------------------------------------------------------------------
 void AY3::bus_mode_read()
 {
-    digitalWrite(A1, LOW);  // BDIR (A1) - 0
-    digitalWrite(A2, HIGH); // BC1 (A2)  - 1
+    digitalWrite(A1, LOW);
+    digitalWrite(A2, HIGH);
 }
 
+//-----------------------------------------------------------------------------
+/// @brief Sets the BDIR and BC1 pins to Data Write state.
+/// @note BC2 is latched HIGH in hardware.
+/// @details Register states are set as follows:
+/// Register      | State
+/// ------------- | -------
+/// BDIR (A1)     | 1
+/// BC1 (A2)      | 0
+/// BC2 (LATCHED) | 1
+//-----------------------------------------------------------------------------
 void AY3::bus_mode_write()
 {
-    digitalWrite(A1, HIGH); // BDIR (A1) - 1
-    digitalWrite(A2, LOW);  // BC1 (A2)  - 0
+    digitalWrite(A1, HIGH);
+    digitalWrite(A2, LOW);
 }
 
+//-----------------------------------------------------------------------------
+/// @brief Sets the BDIR and BC1 pins to Latch Address state.
+/// @note BC2 is latched HIGH in hardware.
+/// @details Register states are set as follows:
+/// Register      | State
+/// ------------- | -------
+/// BDIR (A1)     | 1
+/// BC1 (A2)      | 1
+/// BC2 (LATCHED) | 1
+//-----------------------------------------------------------------------------
 void AY3::bus_mode_latch_address()
 {
-    digitalWrite(A1, LOW); // BDIR (A1) - 1
-    digitalWrite(A2, LOW); // BC1 (A2)  - 1
+    digitalWrite(A1, HIGH);
+    digitalWrite(A2, HIGH);
 }
 
 static const uint16_t INVALID_REG = 0XFFFF;
