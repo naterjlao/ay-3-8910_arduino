@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include "include/ay-3-8910.hpp"
 
-//#define DEBUG
+static const int RESET_PIN = 8;
+static const int BC1_PIN = A5;
+static const int BDIR_PIN = A4;
 
 void AY3::begin()
 {
@@ -15,22 +17,23 @@ void AY3::begin()
     DDRD = 0XFF;  // Set all to output
     PORTD = 0X00; // Set GND to all
 
-    // Configure the A0-A2 Mode/Reset Pins
-    // A0 - Reset
-    // A1 - BDIR
-    // A2 - BC1
-    // Note BC2, latched high in hardware
-    pinMode(A0, OUTPUT);
-    pinMode(A1, OUTPUT);
-    pinMode(A2, OUTPUT);
-
     // Set Bus Mode to Inactive
     bus_mode_inactive();
 
+    // Configure the A0-A5 Mode/Reset Pins
+    // 8 - Reset
+    // A4 - BDIR
+    // A5 - BC1
+    // Note BC2, latched high in hardware
+    pinMode(RESET_PIN, OUTPUT);
+    pinMode(BDIR_PIN, OUTPUT);
+    pinMode(BC1_PIN, OUTPUT);
+
     // Reset the PSG
-    digitalWrite(A0, LOW);
-    delay(50);
-    digitalWrite(A0, HIGH);
+    digitalWrite(RESET_PIN, LOW);
+    delay(1);
+    digitalWrite(RESET_PIN, HIGH);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -39,13 +42,13 @@ void AY3::begin()
 /// @details Register states are set as follows:
 /// Register      | State
 /// ------------- | -------
-/// BDIR (A1)     |  0
-/// BC1 (A2)      |  0
+/// BDIR (A4)     |  0
+/// BC1 (A5)      |  0
 /// BC2 (LATCHED) |  1
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_inactive()
 {
-    PORTC = B00000000 | (PORTC & B11111001);
+    PORTC = B00000000 | (PORTC & B11001111);
 }
 
 //-----------------------------------------------------------------------------
@@ -54,13 +57,13 @@ void AY3::bus_mode_inactive()
 /// @details Register states are set as follows:
 /// Register      | State
 /// ------------- | -------
-/// BDIR (A1)     | 0
-/// BC1 (A2)      | 1
+/// BDIR (A4)     | 0
+/// BC1 (A5)      | 1
 /// BC2 (LATCHED) | 1
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_read()
 {
-    PORTC = B00000100 | (PORTC & B11111001);
+    PORTC = B00100000 | (PORTC & B11001111);
 }
 
 //-----------------------------------------------------------------------------
@@ -69,13 +72,13 @@ void AY3::bus_mode_read()
 /// @details Register states are set as follows:
 /// Register      | State
 /// ------------- | -------
-/// BDIR (A1)     | 1
-/// BC1 (A2)      | 0
+/// BDIR (A4)     | 1
+/// BC1 (A5)      | 0
 /// BC2 (LATCHED) | 1
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_write()
 {
-    PORTC = B00000010 | (PORTC & B11111001);
+    PORTC = B00010000 | (PORTC & B11001111);
 }
 
 //-----------------------------------------------------------------------------
@@ -84,13 +87,13 @@ void AY3::bus_mode_write()
 /// @details Register states are set as follows:
 /// Register      | State
 /// ------------- | -------
-/// BDIR (A1)     | 1
-/// BC1 (A2)      | 1
+/// BDIR (A4)     | 1
+/// BC1 (A5)      | 1
 /// BC2 (LATCHED) | 1
 //-----------------------------------------------------------------------------
 void AY3::bus_mode_latch_address()
 {
-    PORTC = B00000110 | (PORTC & B11111001);
+    PORTC = B00110000 | (PORTC & B11001111);
 }
 
 static const uint16_t INVALID_REG = 0XFFFF;
@@ -114,7 +117,7 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
     const uint16_t NOISE_MASK = 0X1F;
     uint16_t reg = INVALID_REG;
 
-    // Determine register location
+    // Determine Register Address
     switch (ch)
     {
     case AY3::CHANNEL_A:
@@ -140,10 +143,6 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
 
     if (reg != INVALID_REG)
     {
-#ifdef DEBUG
-        Serial.print("REGSET PERIOD: reg=0x");
-        Serial.print(reg, HEX);
-#endif
         if (ch != AY3::CHANNEL_NOISE)
         {
             // ----- TONE COURSE ----- //
@@ -151,36 +150,22 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
             AY3::bus_mode_latch_address();
             PORTD = static_cast<uint8_t>(reg >> 8);
             AY3::bus_mode_inactive();
-#ifdef DEBUG
-            Serial.print(", course_addr=0x");
-            Serial.print(PORTD, HEX);
-#endif
+
             // Data Value
-            PORTD = static_cast<uint8_t>((data >> 8) & UPPER_MASK);
             AY3::bus_mode_write();
+            PORTD = static_cast<uint8_t>((data >> 8) & UPPER_MASK);
             AY3::bus_mode_inactive();
-#ifdef DEBUG
-            Serial.print(", course_data=0x");
-            Serial.print(PORTD, HEX);
-#endif
 
             // ----- TONE FINE ----- //
             // Register Address
             AY3::bus_mode_latch_address();
             PORTD = static_cast<uint8_t>(reg & LOWER_MASK);
             AY3::bus_mode_inactive();
-#ifdef DEBUG
-            Serial.print(", fine_addr=0x");
-            Serial.print(PORTD, HEX);
-#endif
+
             // Data Value
-            PORTD = static_cast<uint8_t>(data & LOWER_MASK);
             AY3::bus_mode_write();
+            PORTD = static_cast<uint8_t>(data & LOWER_MASK);
             AY3::bus_mode_inactive();
-#ifdef DEBUG
-            Serial.print(", fine_data=0x");
-            Serial.print(PORTD, HEX);
-#endif
         }
         else
         {
@@ -192,8 +177,9 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
     }
 }
 
-void AY3::regset_enable(AY3::CHANNEL ch, uint16_t data)
+void AY3::regset_enable(AY3::CHANNEL ch, bool data)
 {
+
 }
 void AY3::regset_ampltd(AY3::CHANNEL ch, uint16_t data, bool envlpe_enable)
 {
