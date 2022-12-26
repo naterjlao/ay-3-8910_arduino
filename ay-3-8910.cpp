@@ -171,15 +171,50 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
         {
             /// @todo Noise register tone set
         }
-#ifdef DEBUG
-        Serial.print("\r\n");
-#endif
     }
 }
 
-void AY3::regset_enable(AY3::CHANNEL ch, bool data)
+void AY3::regset_enable(AY3::CHANNEL ch, bool enable)
 {
+    /// @todo this will override the whole register:
+    /// method 1: keep a local tab of the register state, turn AY3 into a class
+    /// method 2: read off the register and perform operations
 
+    const uint8_t reg = 07;     // Register address
+    static uint8_t data = 0XFF; // Stores the current state of the register
+    uint8_t mask = B00111000; /** @note Noise INOP - change to 0X0 when ready*/
+    uint8_t setb = B00111000;
+
+    if (ch & CHANNEL_A)
+    {
+        mask |= B00000001;
+        setb |= enable ? B00000000 : B00000001;
+    }
+
+    if (ch & CHANNEL_B)
+    {
+        mask |= B00000010;
+        setb |= enable ? B00000000 : B00000010;
+    }
+
+    if (ch & CHANNEL_C)
+    {
+        mask |= B00000100;
+        setb |= enable ? B00000000 : B00000100;
+    }
+
+    // Set to Enable Address
+    AY3::bus_mode_latch_address();
+    PORTD = 07;
+    AY3::bus_mode_inactive();
+
+    // Only change the requested bit
+    data = setb | (data & (~mask));
+
+    // Write update to register
+    AY3::bus_mode_write();
+    PORTD = data;
+    AY3::bus_mode_inactive();
 }
 void AY3::regset_ampltd(AY3::CHANNEL ch, uint16_t data, bool envlpe_enable)
 {
