@@ -1,110 +1,55 @@
 #include "include/ay-3-8910.hpp"
+#include "include/music.hpp"
 
 void setup()
 {
     AY3::begin();
 
-    // Enable Output
-    AY3::regset_enable((AY3::CHANNEL_A | AY3::CHANNEL_B | AY3::CHANNEL_C), true);
-
     // Set Amplitude
-    AY3::bus_mode_latch_address();
-    PORTD = 010;
-    AY3::bus_mode_inactive();
-
-    AY3::bus_mode_write();
-    PORTD = B00000001;
-    AY3::bus_mode_inactive();
-
-    // Set Amplitude
-    AY3::bus_mode_latch_address();
-    PORTD = 011;
-    AY3::bus_mode_inactive();
-
-    AY3::bus_mode_write();
-    PORTD = B00000001;
-    AY3::bus_mode_inactive();
-
-    // Set Amplitude
-    AY3::bus_mode_latch_address();
-    PORTD = 012;
-    AY3::bus_mode_inactive();
-
-    AY3::bus_mode_write();
-    PORTD = B00000001;
-    AY3::bus_mode_inactive();
+    AY3::regset_ampltd(AY3::CHANNEL_A,1);
+    AY3::regset_ampltd(AY3::CHANNEL_B,1);
+    AY3::regset_ampltd(AY3::CHANNEL_C,2);
 }
 
+const MUSIC::NOTE scale[] = {
+    {MUSIC::C, 4},
+    {MUSIC::D, 4},
+    {MUSIC::Eb, 4},
+    {MUSIC::F, 4},
+    {MUSIC::G, 4},
+    {MUSIC::Ab, 4},
+    {MUSIC::B, 4},
+    {MUSIC::C, 5},
+    {MUSIC::D, 5},
+    {MUSIC::Eb, 5},
+    {MUSIC::F, 5},
+    {MUSIC::G, 5},
+    {MUSIC::Ab, 5},
+    {MUSIC::B, 5},
+    {MUSIC::C, 6},
+    {MUSIC::B, 5},
+    {MUSIC::Ab, 5},
+    {MUSIC::G, 5},
+    {MUSIC::F, 5},
+    {MUSIC::Eb, 5},
+    {MUSIC::D, 5},
+    {MUSIC::C, 5},
+    {MUSIC::B, 4},
+    {MUSIC::Ab, 4},
+    {MUSIC::G, 4},
+    {MUSIC::F, 4},
+    {MUSIC::Eb, 4},
+    {MUSIC::D, 4}};
+const size_t scale_len = sizeof(scale) / sizeof(MUSIC::NOTE);
 void loop()
 {
-    int idx;
-    idx = 0;
-    AY3::regset_period(AY3::CHANNEL_C, 0x238);
-    while (idx < 4)
+    for (size_t idx = 0; idx < scale_len; idx++)
     {
-        AY3::regset_enable(AY3::CHANNEL_C, idx % 2 == 0);
-        AY3::regset_period(AY3::CHANNEL_B, 0x11C);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xEF);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xBE);
-        delay(300);
-        idx++;
-    }
-
-    idx = 0;
-    AY3::regset_period(AY3::CHANNEL_C, 0x27E);
-    while (idx < 4)
-    {
-        AY3::regset_enable(AY3::CHANNEL_C, idx % 2 == 0);
-        AY3::regset_period(AY3::CHANNEL_B, 0x13F);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xEF);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xBE);
-        delay(300);
-        idx++;
-    }
-
-    idx = 0;
-    AY3::regset_period(AY3::CHANNEL_C, 0x2A4);
-    while (idx < 4)
-    {
-        AY3::regset_enable(AY3::CHANNEL_C, idx % 2 == 0);
-        AY3::regset_period(AY3::CHANNEL_B, 0x152);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xEF);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xBE);
-        delay(300);
-        idx++;
-    }
-
-    idx = 0;
-    AY3::regset_period(AY3::CHANNEL_C, 0x2CC);
-    while (idx < 2)
-    {
-        AY3::regset_enable(AY3::CHANNEL_C, idx % 2 == 0);
-        AY3::regset_period(AY3::CHANNEL_B, 0x166);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xEF);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xBE);
-        delay(300);
-        idx++;
-    }
-
-    idx = 0;
-    AY3::regset_period(AY3::CHANNEL_C, 0x2F6);
-    while (idx < 2)
-    {
-        AY3::regset_enable(AY3::CHANNEL_C, idx % 2 == 0);
-        AY3::regset_period(AY3::CHANNEL_B, 0x17B);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xEF);
-        delay(300);
-        AY3::regset_period(AY3::CHANNEL_B, 0xBE);
-        delay(300);
-        idx++;
+        MUSIC::play(scale[idx],AY3::CHANNEL_A);
+        delay(125);
+        MUSIC::play(scale[(idx+2)%scale_len],AY3::CHANNEL_B);
+        delay(125);
+        MUSIC::play(scale[(idx+4)%scale_len],AY3::CHANNEL_C);
+        delay(125);
     }
 }

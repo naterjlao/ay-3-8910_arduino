@@ -36,8 +36,7 @@ namespace MUSIC
         REGISTER octave;
     } NOTE;
 
-    void play(NOTE_FREQ note, REGISTER octave=MIDDLE_OCTAVE, COMMAND command=ON, AY3::CHANNEL channel=AY3::CHANNEL_A);
-    void play(NOTE note, COMMAND command=ON, AY3::CHANNEL channel=AY3::CHANNEL_A);
+    void play(NOTE note, AY3::CHANNEL ch=AY3::CHANNEL_A, COMMAND command=ON);
 }
 
 #endif
