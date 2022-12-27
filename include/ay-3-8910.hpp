@@ -1,3 +1,6 @@
+#ifndef __AY_3_8910_HPP__
+#define __AY_3_8910_HPP__
+
 namespace AY3
 {
     typedef enum
@@ -23,3 +26,4 @@ namespace AY3
     void regset_envlpe(CHANNEL ch, uint16_t data);
     void regset_eshape(CHANNEL ch, uint16_t data);
 }
+#endif

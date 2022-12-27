@@ -33,7 +33,6 @@ void AY3::begin()
     digitalWrite(RESET_PIN, LOW);
     delay(1);
     digitalWrite(RESET_PIN, HIGH);
-
 }
 
 //-----------------------------------------------------------------------------
@@ -96,7 +95,8 @@ void AY3::bus_mode_latch_address()
     PORTC = B00110000 | (PORTC & B11001111);
 }
 
-static const uint16_t INVALID_REG = 0XFFFF;
+static const uint8_t INVALID_REG = 0XFF;
+static const uint16_t INVALID_REG16 = 0XFFFF;
 
 //-----------------------------------------------------------------------------
 /// @details Register Mapping is described in the following table.
@@ -115,7 +115,7 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
     const uint16_t UPPER_MASK = 0X0F;
     const uint16_t LOWER_MASK = 0XFF;
     const uint16_t NOISE_MASK = 0X1F;
-    uint16_t reg = INVALID_REG;
+    uint16_t reg = INVALID_REG16;
 
     // Determine Register Address
     switch (ch)
@@ -137,11 +137,11 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
         break;
 
     default:
-        reg = INVALID_REG;
+        reg = INVALID_REG16;
         break;
     }
 
-    if (reg != INVALID_REG)
+    if (reg != INVALID_REG16)
     {
         if (ch != AY3::CHANNEL_NOISE)
         {
@@ -182,7 +182,7 @@ void AY3::regset_enable(AY3::CHANNEL ch, bool enable)
 
     const uint8_t reg = 07;     // Register address
     static uint8_t data = 0XFF; // Stores the current state of the register
-    uint8_t mask = B00111000; /** @note Noise INOP - change to 0X0 when ready*/
+    uint8_t mask = B00111000;   /** @note Noise INOP - change to 0X0 when ready*/
     uint8_t setb = B00111000;
 
     if (ch & CHANNEL_A)
@@ -218,6 +218,37 @@ void AY3::regset_enable(AY3::CHANNEL ch, bool enable)
 }
 void AY3::regset_ampltd(AY3::CHANNEL ch, uint16_t data, bool envlpe_enable)
 {
+    const uint8_t AMPLITUDE_MASK = 0X0F;
+    uint8_t reg = INVALID_REG;
+
+    switch (ch)
+    {
+    case CHANNEL_A:
+        reg = 010;
+        break;
+    case CHANNEL_B:
+        reg = 011;
+        break;
+    case CHANNEL_C:
+        reg = 012;
+        break;
+    default:
+        reg = INVALID_REG;
+        break;
+    }
+
+    /// @todo envelope enable
+
+    if (reg != INVALID_REG)
+    {
+        AY3::bus_mode_latch_address();
+        PORTD = reg;
+        AY3::bus_mode_inactive();
+
+        AY3::bus_mode_write();
+        PORTD = data & AMPLITUDE_MASK;
+        AY3::bus_mode_inactive();
+    }
 }
 void AY3::regset_envlpe(AY3::CHANNEL ch, uint16_t data)
 {
