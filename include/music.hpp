@@ -9,6 +9,8 @@ namespace MUSIC
     typedef uint16_t NOTE_FREQ;
     typedef uint8_t REGISTER;
 
+    static const NOTE_FREQ HOLD_FLAG = 0XFFFF;
+    static const NOTE_FREQ REST_FLAG = 0X0;
     static const REGISTER MIDDLE_OCTAVE = 4;
 
     const NOTE_FREQ C  	= 0x1DE;
@@ -36,7 +38,11 @@ namespace MUSIC
         REGISTER octave;
     } NOTE;
 
-    void play(NOTE note, AY3::CHANNEL ch=AY3::CHANNEL_A, COMMAND command=ON);
+    const NOTE HOLD = {HOLD_FLAG, 0};
+    const NOTE REST = {REST_FLAG, 0};
+
+    void play(const NOTE note, const AY3::CHANNEL ch=AY3::CHANNEL_A, const COMMAND command=ON);
+    void play_track(const NOTE *track, const unsigned long bpm, const size_t len, const size_t nchannels);
 }
 
 #endif
