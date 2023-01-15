@@ -176,10 +176,6 @@ void AY3::regset_period(AY3::CHANNEL ch, uint16_t data)
 
 void AY3::regset_enable(AY3::CHANNEL ch, bool enable)
 {
-    /// @todo this will override the whole register:
-    /// method 1: keep a local tab of the register state, turn AY3 into a class
-    /// method 2: read off the register and perform operations
-
     const uint8_t reg = 07;     // Register address
     static uint8_t data = 0XFF; // Stores the current state of the register
     uint8_t mask = B00111000;   /** @note Noise INOP - change to 0X0 when ready*/
