@@ -86,6 +86,7 @@ MUSIC::NOTE_FREQ midi_map[] =
         MUSIC::B,
 };
 
+MUSIC::NOTE note;
 byte notes_on = 0;
 
 void loop()
@@ -94,8 +95,7 @@ void loop()
     for (size_t track_idx = 0; track_idx < NTRACKS; track_idx++)
         MUSIC::play_track((const NOTE *)&track[track_idx], BPM, TRACK_LEN, NCHANNELS);
 #else
-    MUSIC::NOTE note;
-    if (midi_in.available() > 2)
+    if (midi_in.available() >= 3)
     {
         byte command_in = midi_in.read();
         byte note_in = midi_in.read();
@@ -109,7 +109,8 @@ void loop()
         }
         else if (command_in == MIDI_NOTE_OFF)
         {
-            if (--notes_on == 0)
+            notes_on = (notes_on - 1) % 16;
+            if (!(notes_on > 0))
             {
                 MUSIC::play(MUSIC::REST, AY3::CHANNEL_A, MUSIC::COMMAND::OFF);
             }
