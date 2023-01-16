@@ -90,6 +90,9 @@ MUSIC::NOTE_FREQ midi_map[] =
 
 MUSIC::NOTE note;
 byte notes_on = 0;
+byte command_in;
+byte note_in;
+byte velocity_in;
 
 void loop()
 {
@@ -97,25 +100,41 @@ void loop()
     for (size_t track_idx = 0; track_idx < NTRACKS; track_idx++)
         MUSIC::play_track((const NOTE *)&track[track_idx], BPM, TRACK_LEN, NCHANNELS);
 #else
-    if (midi_in.available() >= 3)
+    if (midi_in.available() > 0)
     {
-        byte command_in = midi_in.read();
-        byte note_in = midi_in.read();
-        byte velocity_in = midi_in.read();
-        if (command_in == MIDI_NOTE_ON)
+        command_in = midi_in.read();
+        switch (command_in)
         {
+        case MIDI_NOTE_ON:
+            while (midi_in.available() == 0);
+            note_in = midi_in.read();
+            while (midi_in.available() == 0);
+            velocity_in = midi_in.read();
             note.note = midi_map[note_in % 12];
             note.octave = note_in / 12;
             MUSIC::play(note, AY3::CHANNEL_A, MUSIC::COMMAND::ON);
             notes_on++;
-        }
-        else if (command_in == MIDI_NOTE_OFF)
-        {
+            break;
+        case MIDI_NOTE_OFF:
+            while (midi_in.available() == 0);
+            note_in = midi_in.read();
+            while (midi_in.available() == 0);
+            velocity_in = midi_in.read();
             notes_on = (notes_on - 1) % 16;
             if (!(notes_on > 0))
             {
                 MUSIC::play(MUSIC::REST, AY3::CHANNEL_A, MUSIC::COMMAND::OFF);
             }
+            break;
+        case MIDI_AFTERTOUCH:
+            // do nothing
+            while (midi_in.available() == 0);
+            midi_in.read();
+            break;
+        case MIDI_CLOCK_CH0:
+            // do nothing
+        default:
+            break;
         }
     }
 #endif
