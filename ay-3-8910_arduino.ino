@@ -68,6 +68,8 @@ void setup()
 
 const byte MIDI_NOTE_ON = 144;
 const byte MIDI_NOTE_OFF = 128;
+const byte MIDI_AFTERTOUCH = 0xD0;
+const byte MIDI_CLOCK_CH0 = 0xF8;
 
 /// @todo put in own header
 MUSIC::NOTE_FREQ midi_map[] =
