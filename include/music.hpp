@@ -13,6 +13,12 @@ namespace MUSIC
     static const NOTE_FREQ REST_FLAG = 0X0;
     static const REGISTER MIDDLE_OCTAVE = 4;
 
+    /// @note The value of period registers can be determined as follows:
+    /// Period Value = (Clock Frequency / Interrupt Frequency) / (Target Frequency)
+    /// Where:
+    /// Clock Frequency = 2MHz = 2,000,000 Hz
+    /// Interrupt Frequency = 16Hz
+
     const NOTE_FREQ C  	= 0x1DE;
     const NOTE_FREQ Db  = 0x1C3;
     const NOTE_FREQ D  	= 0x1AA;
