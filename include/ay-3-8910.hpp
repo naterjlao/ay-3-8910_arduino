@@ -22,8 +22,8 @@ namespace AY3
     // Register/Data Control
     void regset_period(CHANNEL ch, uint16_t data);
     void regset_enable(CHANNEL ch, bool enable);
-    void regset_ampltd(CHANNEL ch, uint16_t data, bool envlpe_enable=false);
-    void regset_envlpe(CHANNEL ch, uint16_t data);
-    void regset_eshape(CHANNEL ch, uint16_t data);
+    void regset_ampltd(CHANNEL ch, uint8_t data, bool envlpe_enable=false);
+    void regset_envlpe();
+    void regset_eshape();
 }
 #endif

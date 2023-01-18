@@ -212,9 +212,9 @@ void AY3::regset_enable(AY3::CHANNEL ch, bool enable)
     PORTD = data;
     AY3::bus_mode_inactive();
 }
-void AY3::regset_ampltd(AY3::CHANNEL ch, uint16_t data, bool envlpe_enable)
+void AY3::regset_ampltd(AY3::CHANNEL ch, uint8_t data, bool envlpe_enable)
 {
-    const uint8_t AMPLITUDE_MASK = 0X0F;
+    const uint8_t AMPLITUDE_MASK = 0X1F;
     uint8_t reg = INVALID_REG;
 
     switch (ch)
@@ -246,9 +246,32 @@ void AY3::regset_ampltd(AY3::CHANNEL ch, uint16_t data, bool envlpe_enable)
         AY3::bus_mode_inactive();
     }
 }
-void AY3::regset_envlpe(AY3::CHANNEL ch, uint16_t data)
+void AY3::regset_envlpe()
 {
+    /// @note the interrupt frequency is 256 
+    uint8_t reg;
+    reg = 014;
+    AY3::bus_mode_latch_address();
+    PORTD = reg;
+    AY3::bus_mode_inactive();
+    AY3::bus_mode_write();
+    PORTD = 0x1;
+    AY3::bus_mode_inactive();
+    reg = 013;
+    AY3::bus_mode_latch_address();
+    PORTD = reg;
+    AY3::bus_mode_inactive();
+    AY3::bus_mode_write();
+    PORTD = 0x86;
+    AY3::bus_mode_inactive();
 }
-void AY3::regset_eshape(AY3::CHANNEL ch, uint16_t data)
+void AY3::regset_eshape()
 {
+    uint8_t reg = 015;
+    AY3::bus_mode_latch_address();
+    PORTD = reg;
+    AY3::bus_mode_inactive();
+    AY3::bus_mode_write();
+    PORTD = B00001010;
+    AY3::bus_mode_inactive();
 }
