@@ -52,7 +52,7 @@ void setup()
     AY3::begin();
 
     // Set Amplitude
-    AY3::regset_ampltd(AY3::CHANNEL_A, 2);
+    AY3::regset_ampltd(AY3::CHANNEL_A, 2); // OR with 0x100 for envelope generation 
     AY3::regset_ampltd(AY3::CHANNEL_B, 2);
     AY3::regset_ampltd(AY3::CHANNEL_C, 2);
 
@@ -66,27 +66,11 @@ void setup()
     midi_in.begin(31250);
 }
 
-const byte MIDI_NOTE_ON = 144;
-const byte MIDI_NOTE_OFF = 128;
+/// @note assuming channel 1
+const byte MIDI_NOTE_ON = 0x90;
+const byte MIDI_NOTE_OFF = 0x80;
 const byte MIDI_AFTERTOUCH = 0xD0;
 const byte MIDI_CLOCK_CH0 = 0xF8;
-
-/// @todo put in own header
-MUSIC::NOTE_FREQ midi_map[] =
-    {
-        MUSIC::C, // 0,12,24,36,48,60
-        MUSIC::Db,
-        MUSIC::D,
-        MUSIC::Eb,
-        MUSIC::E,
-        MUSIC::F,
-        MUSIC::Gb,
-        MUSIC::G,
-        MUSIC::Ab,
-        MUSIC::A,
-        MUSIC::Bb,
-        MUSIC::B,
-};
 
 MUSIC::NOTE note;
 byte notes_on = 0;
@@ -110,7 +94,7 @@ void loop()
             note_in = midi_in.read();
             while (midi_in.available() == 0);
             velocity_in = midi_in.read();
-            note.note = midi_map[note_in % 12];
+            note.note = MUSIC::MIDI_NOTE_MAP[note_in % 12];
             note.octave = note_in / 12;
             MUSIC::play(note, AY3::CHANNEL_A, MUSIC::COMMAND::ON);
             notes_on++;

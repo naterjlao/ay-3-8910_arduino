@@ -5,7 +5,7 @@ static uint16_t calc_frequency(MUSIC::NOTE_FREQ note, MUSIC::REGISTER octave)
     return (octave > MUSIC::MIDDLE_OCTAVE) ? (note >> (octave - MUSIC::MIDDLE_OCTAVE)) : (note << (MUSIC::MIDDLE_OCTAVE - octave));
 }
 
-void MUSIC::play(const NOTE note, const AY3::CHANNEL ch = AY3::CHANNEL_A, const COMMAND command = ON)
+void MUSIC::play(const NOTE note, const AY3::CHANNEL ch = AY3::CHANNEL_A, const COMMAND command = ON, const uint16_t pitchbend = PITCHBEND_MID)
 {
     if (command == MUSIC::ON)
     {
