@@ -94,6 +94,7 @@ void loop()
             note_in = midi_in.read();
             while (midi_in.available() == 0);
             velocity_in = midi_in.read();
+
             note.note = MUSIC::MIDI_NOTE_MAP[note_in % 12];
             note.octave = note_in / 12;
             MUSIC::play(note, AY3::CHANNEL_A, MUSIC::COMMAND::ON);

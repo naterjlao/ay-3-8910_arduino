@@ -1,6 +1,7 @@
 #include "include/music.hpp"
 
-static uint16_t calc_frequency(MUSIC::NOTE_FREQ note, MUSIC::REGISTER octave)
+static uint16_t calc_frequency(const MUSIC::NOTE_FREQ note,
+    const MUSIC::REGISTER octave)
 {
     return (octave > MUSIC::MIDDLE_OCTAVE) ? (note >> (octave - MUSIC::MIDDLE_OCTAVE)) : (note << (MUSIC::MIDDLE_OCTAVE - octave));
 }
